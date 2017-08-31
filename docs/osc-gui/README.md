@@ -1,5 +1,7 @@
 # OSC GUI
 
+Requirements for OSC GUI to adjust or calibrate the hexagons that are being projected. The OSC interface is used in one direction, much like an IR remote control for a TV.
+
 ![](remote.png)
 
 `Hostname`, `Username` and `Password` are always send when a button is being pressed.
