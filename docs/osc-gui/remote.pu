@@ -9,6 +9,6 @@ Adjust X:   | { [ +1 ] | [ +5 ] | [+25 ] | [+125]
                 [ -1 ] | [ -5 ] | [-25 ] | [-125] }
 Adjust Y:   | { [ +1 ] | [ +5 ] | [+25 ] | [+125]
                 [ -1 ] | [ -5 ] | [-25 ] | [-125] }
-Action:     | { [Toggle White] | [Save] }
+Action:     | { [Toggle White] | [Save All] }
 }
 @endsalt
