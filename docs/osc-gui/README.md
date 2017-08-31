@@ -1,3 +1,7 @@
+# OSC GUI
+
+![](remote.png)
+
 `Hostname`, `Username` and `Password` are always send, with each other button being pressed.
 
 When `Toggle White` is pressed, the projection will toggle between normal operation and showing only completely white hexagons without animation in order to help the adjusting (calibration).
