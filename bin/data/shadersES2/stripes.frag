@@ -1,7 +1,9 @@
+#version 150
+
 precision highp float; // this will make the default precision high
 
 //we passed this in from our vert shader
-varying vec2        texcoord0;
+//varying vec2        texcoord0;
 
 //These are variables we set in our ofApp using the ofShader API
 
