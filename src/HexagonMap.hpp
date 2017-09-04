@@ -16,6 +16,8 @@
 
 #define MIN_TIME 10
 #define MAX_TIME 20
+#define MAX_HEXAGONS 4
+#define NUM_VERTICES 7
 
 class HexagonMap
 {
@@ -36,19 +38,23 @@ public:
         int     direction; // the stripe direction
         ofColor color;
         int     eventID;
+        bool    isMuted;
     };
     
     
     HexagonMap();
     ~HexagonMap(){};
     
-    void addHexagon();
+    void addHexagon( ofxOscMessage& m);
     void addHexagon(ofVec2f * verts,int length);
     void addTexCoords(ofMesh &m);
     void mapPoint(ofxOscMessage &m);
+    void muteHexagon(ofxOscMessage &m);
     void moveHexagon(ofxOscMessage &m);
     void movePoint(ofxOscMessage &m);
     void setEditMode(ofxOscMessage &m);
+    void setActiveHexagon(int i);
+    void setActiveVertex(int i);
     void update();
     void createNewSetting();
     void draw();
@@ -57,6 +63,7 @@ public:
     void drawNormal();
     
     void load();
+    void save(ofxOscMessage &m);
     void save();
     
     
@@ -68,6 +75,8 @@ private:
     
     ofShader                    shader;
     bool                        isEditMode;
+    int                         activeHexagon;
+    int                         activeVertex;
     
     float                       nextTimeEvent;
     ofColor                     rndColor;

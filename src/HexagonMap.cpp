@@ -11,33 +11,51 @@
 HexagonMap::HexagonMap()
 {
     load();
-    shader.load("stripes.vert","stripes.frag");
+    
+    
+#ifdef TARGET_OPENGLES
+    shader.load("shadersES2/stripes");
+#else
+    shader.load("shadersGL3/stripes");
+#endif
+
+    //shader.load("stripes.vert","stripes.frag");
     isEditMode = false;
     receiver.setup(20000);
     nextTimeEvent = ofGetElapsedTimef() + 10;
+    
+    activeHexagon = 0;
+    activeVertex = 0;
 }
 
-void HexagonMap::addHexagon()
+void HexagonMap::addHexagon(ofxOscMessage &message)
 {
-    ofMesh m;
-    m.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
-    ofVec2f c = ofVec2f(ofGetWidth() / 2,ofGetHeight() /2);
-    m.addVertex(c);
-    for (int i = 0; i < 7; i++)
-    {
-        int rad = 100;
-        int x = c.x + rad * cos((i / 6.) * TWO_PI);
-        int y = c.y + rad * sin((i / 6.) * TWO_PI);
-        m.addVertex(ofVec2f(x,y));
+    float value = message.getArgAsFloat(0);
+
+    // Limit to 4 Hexagons and only add when value is 1 --> OSCTouch gives two events 
+    if(value == 1 && hexagons.size() < MAX_HEXAGONS){
+        
+        ofMesh m;
+        m.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
+        ofVec2f c = ofVec2f(ofGetWidth() / 2,ofGetHeight() /2);
+        m.addVertex(c);
+        for (int i = 0; i < 7; i++)
+        {
+            int rad = 100;
+            int x = c.x + rad * cos((i / 6.) * TWO_PI);
+            int y = c.y + rad * sin((i / 6.) * TWO_PI);
+            m.addVertex(ofVec2f(x,y));
+        }
+        addTexCoords(m);
+        hexagons.push_back(m);
+        
+        HexagonSetting newSetting;
+        newSetting.direction = floor(ofRandom(2));
+        newSetting.color = ofColor(ofRandom(128,255),ofRandom(128,255),ofRandom(128,255));
+        newSetting.eventID = ofRandom(EVENTS::SIZE);
+        newSetting.isMuted = false;
+        hexSettings.push_back(newSetting);
     }
-    addTexCoords(m);
-    hexagons.push_back(m);
-    
-    HexagonSetting newSetting;
-    newSetting.direction = floor(ofRandom(2));
-    newSetting.color = ofColor(ofRandom(128,255),ofRandom(128,255),ofRandom(128,255));
-    newSetting.eventID = ofRandom(EVENTS::SIZE);
-    hexSettings.push_back(newSetting);
 }
 
 void HexagonMap::addHexagon(ofVec2f * verts,int length)
@@ -55,6 +73,7 @@ void HexagonMap::addHexagon(ofVec2f * verts,int length)
     newSetting.direction = floor(ofRandom(2));
     newSetting.color = ofColor(ofRandom(128,255),ofRandom(128,255),ofRandom(128,255));
     newSetting.eventID = ofRandom(EVENTS::SIZE);
+    newSetting.isMuted = false;
     hexSettings.push_back(newSetting);
 }
 
@@ -90,12 +109,50 @@ void HexagonMap::update()
     {
         ofxOscMessage m;
         receiver.getNextMessage(m);
-        if (m.getAddress() == "/add") addHexagon();
-        else if (m.getAddress() == "/map") mapPoint(m);
-        else if (m.getAddress() == "/moveHexagon") moveHexagon(m);
-        else if (m.getAddress() == "/movePoint") movePoint(m);
+        string label = m.getAddress();
+        
+        cout << "OSC MESSAGE RECIEVED: " << label << endl;
+        
+        if (m.getAddress() == "/mute") muteHexagon(m);
         else if (m.getAddress() == "/edit") setEditMode(m);
-        else if (m.getAddress() == "/save") save();
+        else if (m.getAddress() == "/save") save(m);
+        else if (label == "/up" || label == "/down" || label == "/left" || label == "/right") movePoint(m);
+        
+        // SET active hexagon
+        for(int i=0;i<MAX_HEXAGONS;i++){
+            string messageToCheck = "/hexagon/1/"+ofToString(i+1);
+            
+            if (m.getAddress() == messageToCheck){
+                setActiveHexagon(i);
+            }
+        }
+        
+        // SET active hexagon
+        for(int i=0;i<NUM_VERTICES;i++){
+            string messageToCheck = "/point/1/"+ofToString(i+1);
+            
+            if (m.getAddress() == messageToCheck){
+                setActiveVertex(i);
+            }
+        }
+        
+        
+        
+        /*
+         OSC Commands
+         /left 1 5 25 125
+         /right 1 5 25 125
+         /up 1 5 25 125
+         /down 1 5 25 125 
+         
+         /hexagon/1/1 /hexagon/1/2
+         
+         /point/1/1 /point/1/2
+         
+         /edit
+         
+         /save
+         */
 
 
 
@@ -123,62 +180,105 @@ void HexagonMap::createNewSetting()
     }
 }
 
-void HexagonMap::mapPoint(ofxOscMessage &m)
-{
-    if (!isEditMode) return;
-    int ID = m.getArgAsInt32(0);
-    int pID = m.getArgAsInt32(1);
-    ofVec2f p = ofVec2f(m.getArgAsFloat(2),m.getArgAsFloat(3));
-    if (ID >= hexagons.size() || pID > 7) return;
-    hexagons[ID].getVertices()[pID] = p;
-}
-
-void HexagonMap::moveHexagon(ofxOscMessage &m)
-{
-    //move the complete hexagon by point in x & y
-    if (!isEditMode) return;
-    int ID = m.getArgAsInt32(0);
-    ofVec2f shift = hexagons[ID].getCentroid() - ofVec2f(m.getArgAsFloat(1),m.getArgAsFloat(2));
-    for (int i = 0; i < hexagons[ID].getNumVertices(); ++i)
-    {
-        hexagons[ID].getVertices()[i] += shift;
-    }
-}
-
 void HexagonMap::movePoint(ofxOscMessage &m)
 {
     if (!isEditMode) return;
-    int ID = m.getArgAsInt32(0);
-    int pID = m.getArgAsInt32(1);
-    ofVec2f shift = ofVec2f(m.getArgAsFloat(2),m.getArgAsFloat(3));
-    if (ID >= hexagons.size() || pID > 7) return;
-    hexagons[ID].getVertices()[pID] += shift;
+    // get label to gfigure out which command was sent
+    string label = m.getAddress();
+    float amount =  m.getArgAsFloat(0);
+    
+    ofVec2f shift = ofVec2f(0,0);
+    if(label == "/up"){
+        shift.y = -amount;
+    }
+    else if(label == "/down"){
+        shift.y = amount;
+        
+    }
+    else if(label == "/left"){
+        shift.x = -amount;
+        
+    }
+    else if(label == "/right"){
+        shift.x = amount;
+        
+    }
+    
+    // Safety
+    if (activeHexagon >= hexagons.size() || activeVertex > 7) return;
+    
+    // IF center point is selected we move the whole hexagon
+    if(activeVertex == 0){
+        for (int i = 0; i < hexagons[activeHexagon].getNumVertices(); ++i)
+        {
+            hexagons[activeHexagon].getVertices()[i] += shift;
+        }
+    }
+    else{
+        hexagons[activeHexagon].getVertices()[activeVertex] += shift;
+    }
 }
 
 void HexagonMap::setEditMode(ofxOscMessage &m)
 {
-    isEditMode = m.getArgAsBool(0);
-    save();
-    for (int i = 0; i < hexagons.size(); i++)
-    {
-        addTexCoords(hexagons[i]);
+    float value = m.getArgAsFloat(0);
+    if(value == 1) {
+    
+        isEditMode = ! isEditMode;
+        save();
+        for (int i = 0; i < hexagons.size(); i++)
+        {
+            addTexCoords(hexagons[i]);
+        }
+    }
+}
+
+void HexagonMap::setActiveHexagon(int i){
+    activeHexagon = i;
+}
+
+void HexagonMap::setActiveVertex(int i){
+    activeVertex = i;
+}
+
+// Mute the hexagon
+void HexagonMap::muteHexagon(ofxOscMessage &m)
+{
+    float value = m.getArgAsFloat(0);
+    if(value == 1 && isEditMode == true) {
+        hexSettings[activeHexagon].isMuted = ! hexSettings[activeHexagon].isMuted;
     }
 }
 
 
 void HexagonMap::draw()
 {
-    if (isEditMode)
-    {
-	ofSetLineWidth(5);
-        for (int i = 0; i < hexagons.size(); i++)
-        {
-            hexagons[i].drawWireframe();
+    // Loop through the hexagons
+    for (int i = 0; i < hexagons.size(); i++){
+        
+        // CHECK if they are not muted
+        if(!hexSettings[i].isMuted){
+    
+            // EDIT MODE
+            if (isEditMode)
+            {
+                // draw the active one solid
+                if(i == activeHexagon){
+                    ofSetLineWidth(8);
+                    hexagons[i].drawFaces();
+                }
+                // and the others as wireframe
+                else{
+                    ofSetLineWidth(5);
+                    hexagons[i].drawWireframe();
+                }
+            }
+            // REGULAR DRAW MODE
+            else // draw with shader
+            {
+                drawSingleHexagon(i);
+            }
         }
-    }
-    else // draw with shader
-    {
-        for (int i = 0; i < hexagons.size(); i++) drawSingleHexagon(i);
     }
 }
 
@@ -261,13 +361,24 @@ void HexagonMap::load()
     }
 }
 
+// Save function wrapper to be able to check for Touch OSC '1' value
+void HexagonMap::save(ofxOscMessage &m)
+{
+    float value = m.getArgAsFloat(0);
+    if(value == 1) {
+        save();
+    }
+}
+
 void HexagonMap::save()
 {
+    // FIXME: does not work yet
     ofxXmlSettings settings;
     for (int id = 0; id < hexagons.size(); id++)
     {
         settings.addTag("hex");
-        settings.pushTag("hex");
+        settings.pushTag("hex",id);
+        
         for (int i = 0; i < hexagons[id].getNumVertices(); i++)
         {
             settings.addTag("p");
@@ -276,7 +387,10 @@ void HexagonMap::save()
             settings.addValue("py",hexagons[id].getVertices()[i].y);
             settings.popTag();
         }
+        
         settings.popTag();
     }
     settings.save("settings.xml");
+    
 }
+
