@@ -10,8 +10,10 @@
 
 HexagonMap::HexagonMap()
 {
+    loadScenes();
     load();
-    
+    fuckUpCounter = 0;
+    nextFuckUpAt = ofRandom(MIN_FUCK_UP,MAX_FUCK_UP);
     
 #ifdef TARGET_OPENGLES
     shader.load("shadersES2/stripes");
@@ -52,7 +54,7 @@ void HexagonMap::addHexagon(ofxOscMessage &message)
         HexagonSetting newSetting;
         newSetting.direction = floor(ofRandom(2));
         newSetting.color = ofColor(ofRandom(128,255),ofRandom(128,255),ofRandom(128,255));
-        newSetting.eventID = ofRandom(EVENTS::SIZE);
+        newSetting.drawingID = ofRandom(DRAWING::SIZE);
         newSetting.isMuted = false;
         hexSettings.push_back(newSetting);
     }
@@ -69,10 +71,11 @@ void HexagonMap::addHexagon(ofVec2f * verts,int length)
     addTexCoords(m);
 
     hexagons.push_back(m);
+    
     HexagonSetting newSetting;
-    newSetting.direction = floor(ofRandom(2));
-    newSetting.color = ofColor(ofRandom(128,255),ofRandom(128,255),ofRandom(128,255));
-    newSetting.eventID = ofRandom(EVENTS::SIZE);
+    newSetting.direction = 0;
+    newSetting.color = ofColor(255,255,255);
+    newSetting.drawingID = 0;
     newSetting.isMuted = false;
     hexSettings.push_back(newSetting);
 }
@@ -164,19 +167,43 @@ void HexagonMap::update()
         if (now > nextTimeEvent)
         {
             createNewSetting();
-            nextTimeEvent = now + ofRandom(MIN_TIME,MAX_TIME);
+            nextTimeEvent = now + ofRandom(globalSpeedLow,globalSpeedHigh);
         }
     }
 }
 
 void HexagonMap::createNewSetting()
 {
-    // trigger an event
+    // select a scene and set the hexagons, also count the number of settings then mak one crazy after 10-20, by now only the speed, but could be also something else
+    
+    if (scenes.size() == 0) //random
+    {
+        for (int i = 0; i < hexSettings.size(); i++)
+        {
+            hexSettings[i].direction = ofRandom(2);
+            hexSettings[i].color = ofColor(ofRandom(128,255),ofRandom(128,255),ofRandom(128,255));
+            hexSettings[i].drawingID = ofRandom(DRAWING::SIZE);
+        }
+        return;
+    }
+    fuckUpCounter++;
+    int fucked = -1;
+    if (fuckUpCounter == nextFuckUpAt)
+    {
+        //time to change one for one drawing period
+        fucked = ofRandom(hexagons.size());
+        nextFuckUpAt = ofRandom(MIN_FUCK_UP,MAX_FUCK_UP);
+        fuckUpCounter = 0;
+    }
+    
+    actualScene = ofRandom(scenes.size());
     for (int i = 0; i < hexSettings.size(); i++)
     {
-        hexSettings[i].direction = ofRandom(2);
-        hexSettings[i].color = ofColor(ofRandom(128,255),ofRandom(128,255),ofRandom(128,255));
-        hexSettings[i].eventID = ofRandom(EVENTS::SIZE);
+        hexSettings[i].direction = scenes[actualScene].direction;
+        hexSettings[i].color = scenes[actualScene].color;
+        hexSettings[i].drawingID = scenes[actualScene].drawingID;
+        hexSettings[i].speed = scenes[actualScene].speed;
+        if(fucked == i) hexSettings[i].speed = scenes[actualScene].speed * -1;
     }
 }
 
@@ -285,9 +312,9 @@ void HexagonMap::draw()
 void HexagonMap::drawSingleHexagon(int & id)
 {
     float scale = ofNoise(ofGetElapsedTimef() + id);
-    switch (hexSettings[id].eventID)
+    switch (hexSettings[id].drawingID)
     {
-        case EVENTS::NORMAL:
+        case DRAWING::NORMAL:
             ofSetColor(255);
             shader.begin();
             shader.setUniform1f("phase", ofNoise(ofGetElapsedTimef()));
@@ -296,16 +323,16 @@ void HexagonMap::drawSingleHexagon(int & id)
             shader.end();
             break;
             
-        case EVENTS::FORWARD:
+        case DRAWING::FORWARD:
             ofSetColor(255);
             shader.begin();
-            shader.setUniform1f("phase", ofGetElapsedTimef());
+            shader.setUniform1f("phase", ofGetElapsedTimef() * hexSettings[id].speed);
             shader.setUniform1i("direction", hexSettings[id].direction);
             hexagons[id].draw();
             shader.end();
             break;
             
-        case EVENTS::SCALED:
+        case DRAWING::SCALED:
             ofSetColor(255);
             shader.begin();
             shader.setUniform1f("phase", ofNoise(ofGetElapsedTimef()));
@@ -319,12 +346,12 @@ void HexagonMap::drawSingleHexagon(int & id)
             shader.end();
             break;
             
-        case EVENTS::COLORED:
+        case DRAWING::COLORED:
             ofSetColor(hexSettings[id].color);
             hexagons[id].draw();
             break;
             
-        case EVENTS::SCALED_COLORED:
+        case DRAWING::SCALED_COLORED:
             ofSetColor(hexSettings[id].color);
             ofPushMatrix();
             ofTranslate(hexagons[id].getCentroid());
@@ -347,6 +374,7 @@ void HexagonMap::load()
     for (int id = 0; id < settings.getNumTags("hex"); id++)
     {
         settings.pushTag("hex",id);
+        bool muted = settings.getValue("isMuted", false);
         int pCount = settings.getNumTags("p");
         ofVec2f points[8];
         for (int i = 0; i < pCount; i++)
@@ -358,8 +386,34 @@ void HexagonMap::load()
         }
         settings.popTag();
         addHexagon(points, 8);
+        hexSettings.back().isMuted = muted;
     }
 }
+
+void HexagonMap::loadScenes()
+{
+    ofxXmlSettings settings;
+    settings.load("scenes-raspberry.xml");
+    globalSpeedLow = settings.getValue("gloabalSpeedLow", MIN_TIME);
+    globalSpeedHigh = settings.getValue("gloabalSpeedHigh", MAX_TIME);
+    for (int i = 0; i < settings.getNumTags("scene"); i++)
+    {
+        Scene newScene;
+        settings.pushTag("scene",i);
+        newScene.drawingID = settings.getValue("drawingID", 0);
+        newScene.stripeWidth = settings.getValue("stripeWidth", 0.5); // percent 0-1
+        int r = settings.getValue("colorR", 255);
+        int g = settings.getValue("colorG", 255);
+        int b = settings.getValue("colorB", 255);
+        newScene.speed = settings.getValue("speed", 0.5);
+        newScene.color = ofColor(r,g,b);
+        settings.popTag();
+        scenes.push_back(newScene);
+    }
+    actualScene = ofRandom(scenes.size());
+//    createNewSetting();
+}
+
 
 // Save function wrapper to be able to check for Touch OSC '1' value
 void HexagonMap::save(ofxOscMessage &m)
@@ -378,7 +432,7 @@ void HexagonMap::save()
     {
         settings.addTag("hex");
         settings.pushTag("hex",id);
-        
+        settings.addValue("isMuted", hexSettings[id].isMuted);
         for (int i = 0; i < hexagons[id].getNumVertices(); i++)
         {
             settings.addTag("p");
