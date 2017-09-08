@@ -2,9 +2,9 @@
 Hexagon mapping
 
 
-# Installing RPi
+# Installing Raspbian
 
-Below is a very quick and make-shift guide to install RPi.
+Below is a very quick and make-shift guide to install RPi with the hex project.
 
 1. Install Raspbian Lite on micro SDHC card, use Raspbian stretch.
 
@@ -14,6 +14,10 @@ Below is a very quick and make-shift guide to install RPi.
 
 1. Become root with `sudo su`.
 
+1. Prevent installation of recommenede and suggested packages. Edit `/etc/apt/apt.conf` and add the lines:
+    APT::Install-Recommends "false";
+    APT::Install-Suggests "false";
+
 1. Start configuration tool `raspi-config`.
 
 1. Change password to default password of our organisation. (The username should remain `pi`.)
@@ -22,11 +26,13 @@ Below is a very quick and make-shift guide to install RPi.
 
 1. Change boot options to `B1 Console` and to `B2, don't wait for network`.
 
-1. Change localisation to `I1` unselect with space bar `en_GB.UTF-8 UTF-8` and select with space `en_US.UTF-8 UTF-8` and save with `TAB` and `Ok`. Se default system locale to `en_US.UTF-8` and save with `TAB` and `Ok`.
+1. Change localisation/internationlization to `I1` unselect with space bar `en_GB.UTF-8 UTF-8` and select with space `en_US.UTF-8 UTF-8` and save with `TAB` and `Ok`. Se default system locale to `en_US.UTF-8` and save with `TAB` and `Ok`.
 
-1. Change localisation to `I2` and choose `Europe` and `Tilburg`.
+1. Change localisation/internationlization to `I2` and choose `Europe` and `Tilburg`.
 
-1. Change localisation to `I3` and choose `Generic 105-key (Intl) PC` then `Other` and then `English (US)` and finally `English (US) - Enlish (US, with euro on 5)`. Then choose `No AltGr key` and `Right Logo key` for compose key.
+1. Change localisation/internationlization to `I3` and choose `Generic 105-key (Intl) PC` then `Other` and then `English (US)` and finally `English (US) - Enlish (US, with euro on 5)`. Then choose `No AltGr key` and `Right Logo key` for compose key.
+
+1. Set localisation/internationlization to `I4` and choose `NL Netherlands`
 
 1. For Interfacing, choose SSH and choose `Yes`.
 
@@ -40,17 +46,84 @@ Below is a very quick and make-shift guide to install RPi.
 
 1. Reboot by typing `reboot`. This will also activate new locale and keyboard settings.
 
-1. If the RPi starts properly and all is well and you are done, stop the device with `halt` and only power off when the shutdown is complete.
+1. Log in with username `pi` and the new password.
+
+1. Become root with `sudo su`.
+
+1. `apt-get update`
+
+1. `apt-get dist-upgrade`
+
+1. `apt-get install git tree`
 
 
-# Futher configuration
+# Installing USB wifi kernel driver
 
-1. TODO
+1. `cd ~`
 
-cd /etc/apt
-vi apt.conf
+1. `apt-get install lshw raspberrypi-kernel-headers dkms build-essential`
 
-TODO
+1. `git clone https://github.com/Mange/rtl8192eu-linux-driver.git`
+
+1. `cd rtl8192eu-linux-driver`
+
+1. edit `Makefile` and set `CONFIG_PLATFORM_I386_PC = y` to `n` and `CONFIG_PLATFORM_ARM_RPI = n` to `y`
+
+1. `sudo dkms add .`
+
+1. `sudo dkms install rtl8192eu/1.0`
+
+1. edit as root `/etc/wpa_supplicant/wpa_supplicant.conf` and add
+    network={
+        ssid="WIFINAME1"
+        psk="PASSWORD1"
+    }
+
+1. reboot with `sudo reboot`
 
 
+# Installing openFrameworks
 
+`cd ~`
+`wget http://ci.openframeworks.cc/versions/nightly/of_v20170714_linuxarmv6l_nightly.tar.gz`
+`tar xf of_v20170714_linuxarmv6l_nightly.tar.gz`
+`cd of_v20170714_linuxarmv6l_release`
+`cd scripts/linux/debian`
+`sudo ./install_dependencies.sh`
+`cd ..`
+`./compileOF.sh`
+`sudo raspi-config` and set GPU memory to `256`
+`apt-get clean`
+
+
+# Installing hex application
+
+1. `cd ~`
+
+1. `cd of[TAB]`
+
+1. `cd apps/myApps`
+
+1. `git clone https://github.com/z25/hex.git`
+
+1. `make`
+
+1. test app with command `TODO`
+
+1. TODO add startup of app to cron
+
+
+# Installation status
+
+hostname|model|tuned|wifi |openFrameworks|hex       |screen
+--------|-----|-----|-----|--------------|----------|---
+janna¹  |2    |yes  |yes  |compiling     |uncompiled|blanking
+els     |2    |yes  |build|build         |uncompiled|blanking
+debora  |2    |yes  |build|build         |uncompiled|blanking
+petra   |2    |yes  |build|compiling     |uncompiled|blanking
+inge    |2    |yes  |build|build         |uncompiled|blanking
+hku     |3    |yes  |yes  |compiling     |uncompiled|blanking
+melanie |?    |yes  |     |compiling     |uncompiled|blanking
+qualle  |?    |yes  |     |compiling     |uncompiled|blanking
+
+1) red LED broken?
