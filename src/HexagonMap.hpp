@@ -63,6 +63,7 @@ public:
     void addTexCoords(ofMesh &m);
     void mapPoint(ofxOscMessage &m);
     void muteHexagon(ofxOscMessage &m);
+    void revert(ofxOscMessage &m);
     void moveHexagon(ofxOscMessage &m);
     void movePoint(ofxOscMessage &m);
     void setEditMode(ofxOscMessage &m);
@@ -85,6 +86,7 @@ private:
     
     ofxOscReceiver              receiver;
     vector<ofMesh>              hexagons;
+    vector<ofVec2f>             hexCenters;
     vector<HexagonSetting>      hexSettings;
     vector<Scene>               scenes;
     

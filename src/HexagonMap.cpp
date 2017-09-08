@@ -119,6 +119,7 @@ void HexagonMap::update()
         if (m.getAddress() == "/mute") muteHexagon(m);
         else if (m.getAddress() == "/edit") setEditMode(m);
         else if (m.getAddress() == "/save") save(m);
+        else if (m.getAddress() == "/revert") revert(m);
         else if (label == "/up" || label == "/down" || label == "/left" || label == "/right") movePoint(m);
         
         // SET active hexagon
@@ -130,37 +131,16 @@ void HexagonMap::update()
             }
         }
         
-        // SET active hexagon
-        for(int i=0;i<NUM_VERTICES;i++){
+        // SET active hexagon point
+        // the 2 offset is because we also use scale/move as index
+        for(int i=0;i<NUM_VERTICES+2;i++){
             string messageToCheck = "/point/1/"+ofToString(i+1);
             
             if (m.getAddress() == messageToCheck){
                 setActiveVertex(i);
             }
         }
-        
-        
-        
-        /*
-         OSC Commands
-         /left 1 5 25 125
-         /right 1 5 25 125
-         /up 1 5 25 125
-         /down 1 5 25 125 
-         
-         /hexagon/1/1 /hexagon/1/2
-         
-         /point/1/1 /point/1/2
-         
-         /edit
-         
-         /save
-         */
-
-
-
-
-    }
+      }
     if (!isEditMode)
     {
         float now = ofGetElapsedTimef();
@@ -207,43 +187,70 @@ void HexagonMap::createNewSetting()
     }
 }
 
+/* 
+ There are three different possibilities for movePoint
+ - scale the form (0 point or a in OSC GUI)
+ - move the whole shape (1 point or b in OSC GUI)
+ - move point of shape ( 2,3,4,5,6,7,8 or c,d,e,f,g,h,i in OSC GUI)
+
+*/
 void HexagonMap::movePoint(ofxOscMessage &m)
 {
-    if (!isEditMode) return;
-    // get label to gfigure out which command was sent
-    string label = m.getAddress();
-    float amount =  m.getArgAsFloat(0);
+    float value = m.getArgAsFloat(0);
     
-    ofVec2f shift = ofVec2f(0,0);
-    if(label == "/up"){
-        shift.y = -amount;
-    }
-    else if(label == "/down"){
-        shift.y = amount;
-        
-    }
-    else if(label == "/left"){
-        shift.x = -amount;
-        
-    }
-    else if(label == "/right"){
-        shift.x = amount;
-        
-    }
+    if (!isEditMode || value == 0) return;
     
-    // Safety
-    if (activeHexagon >= hexagons.size() || activeVertex > 7) return;
-    
-    // IF center point is selected we move the whole hexagon
-    if(activeVertex == 0){
-        for (int i = 0; i < hexagons[activeHexagon].getNumVertices(); ++i)
-        {
-            hexagons[activeHexagon].getVertices()[i] += shift;
+        // get label to gfigure out which command was sent
+        string label = m.getAddress();
+        float amount = m.getArgAsFloat(0);
+        
+        ofVec2f shift = ofVec2f(0,0);
+        if(label == "/up")          shift.y = -amount;
+        else if(label == "/down")   shift.y =  amount;
+        else if(label == "/left")   shift.x = -amount;
+        else if(label == "/right")  shift.x =  amount;
+        
+        ofLogVerbose("MOVE vertex: "+ofToString(activeVertex));
+        
+        // Safety
+        if (activeHexagon >= hexagons.size() || activeVertex > 9) return;
+        
+        // IF a is selected from gui we scale the whole hexagon
+        if(activeVertex == 0){
+            ofLogVerbose("We should Scale the whole hexagon( "+ofToString(hexagons[activeHexagon].getNumVertices())+" )");
+            
+            int scaleAmount = 0;
+            if(shift.x == 0)        scaleAmount = int(shift.y);
+            else if(shift.y == 0)   scaleAmount = int(shift.x);
+        
+            ofVec2f centerPoint = hexagons[activeHexagon].getVertices()[0];
+            for (int i = 1; i < hexagons[activeHexagon].getNumVertices(); ++i)
+            {
+                ofVec2f point = hexagons[activeHexagon].getVertices()[i];
+                int dist = int(centerPoint.distance(point));
+                int rad = ofClamp(dist + scaleAmount,20,ofGetWidth());
+                
+                int x = centerPoint.x + rad * cos((i / 6.) * TWO_PI);
+                int y = centerPoint.y + rad * sin((i / 6.) * TWO_PI);
+                
+                hexagons[activeHexagon].getVertices()[i].x = x;
+                hexagons[activeHexagon].getVertices()[i].y = y;
+            }
         }
-    }
-    else{
-        hexagons[activeHexagon].getVertices()[activeVertex] += shift;
-    }
+        // IF b is selected from gui we move the whole hexagon
+        else if(activeVertex == 1){
+            ofLogVerbose("We should Move the whole hexagon");
+            for (int i = 0; i < hexagons[activeHexagon].getNumVertices(); ++i)
+            {
+                hexagons[activeHexagon].getVertices()[i] += shift;
+            }
+        }
+        // ELSE we move point of hexagon
+        // since we use 0 ad 1 for move and scale we need to do -2 to get the correct vertex.
+        else{
+            ofLogVerbose("We should Move");
+            hexagons[activeHexagon].getVertices()[activeVertex-2] += shift;
+        }
 }
 
 void HexagonMap::setEditMode(ofxOscMessage &m)
@@ -256,8 +263,10 @@ void HexagonMap::setEditMode(ofxOscMessage &m)
         for (int i = 0; i < hexagons.size(); i++)
         {
             addTexCoords(hexagons[i]);
+            // save current center points for aal hexagons voor revert
+            hexCenters[i] = hexagons[i].getVertices()[0];
         }
-    }
+      }
 }
 
 void HexagonMap::setActiveHexagon(int i){
@@ -266,6 +275,7 @@ void HexagonMap::setActiveHexagon(int i){
 
 void HexagonMap::setActiveVertex(int i){
     activeVertex = i;
+    ofLogVerbose("Set active vertex: "+ofToString(i));
 }
 
 // Mute the hexagon
@@ -277,6 +287,30 @@ void HexagonMap::muteHexagon(ofxOscMessage &m)
     }
 }
 
+// Rvert the edited hexagon
+void HexagonMap::revert(ofxOscMessage &m)
+{
+    float value = m.getArgAsFloat(0);
+    
+    if(value == 1 && isEditMode == true) {
+        
+        ofVec2f centerPoint = hexCenters[activeHexagon];
+        hexagons[activeHexagon].getVertices()[0] = centerPoint;
+        for (int i = 1; i < hexagons[activeHexagon].getNumVertices(); ++i)
+        {
+            ofVec2f point = hexagons[activeHexagon].getVertices()[i];
+            int rad = 100;
+            
+            int x = centerPoint.x + rad * cos((i / 6.) * TWO_PI);
+            int y = centerPoint.y + rad * sin((i / 6.) * TWO_PI);
+            
+            hexagons[activeHexagon].getVertices()[i].x = x;
+            hexagons[activeHexagon].getVertices()[i].y = y;
+        }
+
+    }
+    
+}
 
 void HexagonMap::draw()
 {
@@ -291,13 +325,12 @@ void HexagonMap::draw()
             {
                 // draw the active one solid
                 if(i == activeHexagon){
-                    ofSetLineWidth(8);
-                    hexagons[i].drawFaces();
+                    hexagons[i].drawWireframe();
                 }
                 // and the others as wireframe
                 else{
-                    ofSetLineWidth(5);
-                    hexagons[i].drawWireframe();
+                    //hexagons[i].drawWireframe();
+                    drawSingleHexagon(i);
                 }
             }
             // REGULAR DRAW MODE
@@ -387,6 +420,8 @@ void HexagonMap::load()
         settings.popTag();
         addHexagon(points, 8);
         hexSettings.back().isMuted = muted;
+        // get center of hex and push back in the array
+        hexCenters.push_back(points[0]);
     }
 }
 
@@ -426,7 +461,6 @@ void HexagonMap::save(ofxOscMessage &m)
 
 void HexagonMap::save()
 {
-    // FIXME: does not work yet
     ofxXmlSettings settings;
     for (int id = 0; id < hexagons.size(); id++)
     {
@@ -445,6 +479,5 @@ void HexagonMap::save()
         settings.popTag();
     }
     settings.save("settings.xml");
-    
 }
 
