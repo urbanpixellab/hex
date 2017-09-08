@@ -39,14 +39,14 @@ void HexagonMap::addHexagon(ofxOscMessage &message)
         
         ofMesh m;
         m.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
-        ofVec2f c = ofVec2f(ofGetWidth() / 2,ofGetHeight() /2);
+        ofVec3f c = ofVec3f(ofGetWidth() / 2,ofGetHeight() /2,0);
         m.addVertex(c);
         for (int i = 0; i < 7; i++)
         {
             int rad = 100;
             int x = c.x + rad * cos((i / 6.) * TWO_PI);
             int y = c.y + rad * sin((i / 6.) * TWO_PI);
-            m.addVertex(ofVec2f(x,y));
+            m.addVertex(ofVec3f(x,y,0));
         }
         addTexCoords(m);
         hexagons.push_back(m);
@@ -60,7 +60,7 @@ void HexagonMap::addHexagon(ofxOscMessage &message)
     }
 }
 
-void HexagonMap::addHexagon(ofVec2f * verts,int length)
+void HexagonMap::addHexagon(ofVec3f * verts,int length)
 {
     ofMesh m;
     m.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
@@ -204,7 +204,7 @@ void HexagonMap::movePoint(ofxOscMessage &m)
         string label = m.getAddress();
         float amount = m.getArgAsFloat(0);
         
-        ofVec2f shift = ofVec2f(0,0);
+        ofVec3f shift = ofVec3f(0,0,0);
         if(label == "/up")          shift.y = -amount;
         else if(label == "/down")   shift.y =  amount;
         else if(label == "/left")   shift.x = -amount;
@@ -243,6 +243,8 @@ void HexagonMap::movePoint(ofxOscMessage &m)
             for (int i = 0; i < hexagons[activeHexagon].getNumVertices(); ++i)
             {
                 hexagons[activeHexagon].getVertices()[i] += shift;
+		//hexagons[activeHexagon].getVertices()[i].set(shift);
+		//hexagons[activeHexagon].getVertices()[i].y += shift.y;
             }
         }
         // ELSE we move point of hexagon
@@ -294,7 +296,7 @@ void HexagonMap::revert(ofxOscMessage &m)
     
     if(value == 1 && isEditMode == true) {
         
-        ofVec2f centerPoint = hexCenters[activeHexagon];
+        ofVec3f centerPoint = hexCenters[activeHexagon];
         hexagons[activeHexagon].getVertices()[0] = centerPoint;
         for (int i = 1; i < hexagons[activeHexagon].getNumVertices(); ++i)
         {
@@ -409,7 +411,7 @@ void HexagonMap::load()
         settings.pushTag("hex",id);
         bool muted = settings.getValue("isMuted", false);
         int pCount = settings.getNumTags("p");
-        ofVec2f points[8];
+        ofVec3f points[8];
         for (int i = 0; i < pCount; i++)
         {
             settings.pushTag("p",i);

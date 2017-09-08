@@ -59,7 +59,7 @@ public:
     ~HexagonMap(){};
     
     void addHexagon( ofxOscMessage& m);
-    void addHexagon(ofVec2f * verts,int length);
+    void addHexagon(ofVec3f * verts,int length);
     void addTexCoords(ofMesh &m);
     void mapPoint(ofxOscMessage &m);
     void muteHexagon(ofxOscMessage &m);
