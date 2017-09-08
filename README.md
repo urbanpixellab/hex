@@ -119,14 +119,14 @@ Below is a very quick and make-shift guide to install RPi with the hex project.
 # Installation status
 
 hostname|model|tuned|wifi |openFrameworks|hex       |screen  |rpi-update
---------|-----|-----|-----|--------------|----------|---
-janna¹  |2    |yes  |yes  |compiling     |uncompiled|blanking
-els     |2    |yes  |build|build         |uncompiled|blanking
-debora  |2    |yes  |build|build         |uncompiled|blanking
-petra   |2    |yes  |build|compiling     |uncompiled|blanking
-inge    |2    |yes  |build|build         |uncompiled|blanking
-hku     |3    |yes  |yes  |compiling     |uncompiled|blanking
-melanie |?    |yes  |     |compiling     |uncompiled|blanking
-qualle  |?    |yes  |     |compiling     |uncompiled|blanking
+--------|-----|-----|-----|--------------|----------|--------|----------
+janna¹  |2    |yes  |yes  |compiling     |uncompiled|blanking|
+els     |2    |yes  |build|build         |uncompiled|blanking|
+debora  |2    |yes  |build|build         |uncompiled|blanking|
+petra   |2    |yes  |build|compiling     |uncompiled|blanking|
+inge    |2    |yes  |build|build         |uncompiled|blanking|
+hku     |3    |yes  |yes  |compiling     |uncompiled|blanking|
+melanie |?    |yes  |     |compiling     |uncompiled|blanking|
+qualle  |?    |yes  |     |compiling     |uncompiled|blanking|
 
 1) red LED broken?
