@@ -18,12 +18,14 @@
 #define MAX_TIME 20
 #define MAX_HEXAGONS 4
 #define NUM_VERTICES 7
+#define MIN_FUCK_UP 10
+#define MAX_FUCK_UP 20
 
 class HexagonMap
 {
     
 public:
-    enum EVENTS
+    enum DRAWING
     {
         NORMAL = 0,
         FORWARD,
@@ -33,12 +35,23 @@ public:
         SIZE
     };
     
-    struct HexagonSetting
+    struct HexagonSetting //setting per hexagon!!!
     {
         int     direction; // the stripe direction
         ofColor color;
-        int     eventID;
+        float   stripeWidth;
+        int     drawingID;
+        float   speed;
         bool    isMuted;
+    };
+    
+    struct Scene
+    {
+        int     direction; // the stripe direction
+        ofColor color; //rgb
+        float   stripeWidth; //0-1
+        int     drawingID; // 0 -> DRAWING::SIZE
+        float   speed;// -1 -> +1
     };
     
     
@@ -50,6 +63,7 @@ public:
     void addTexCoords(ofMesh &m);
     void mapPoint(ofxOscMessage &m);
     void muteHexagon(ofxOscMessage &m);
+    void revert(ofxOscMessage &m);
     void moveHexagon(ofxOscMessage &m);
     void movePoint(ofxOscMessage &m);
     void setEditMode(ofxOscMessage &m);
@@ -63,6 +77,7 @@ public:
     void drawNormal();
     
     void load();
+    void loadScenes();
     void save(ofxOscMessage &m);
     void save();
     
@@ -71,7 +86,9 @@ private:
     
     ofxOscReceiver              receiver;
     vector<ofMesh>              hexagons;
+    vector<ofVec2f>             hexCenters;
     vector<HexagonSetting>      hexSettings;
+    vector<Scene>               scenes;
     
     ofShader                    shader;
     bool                        isEditMode;
@@ -79,7 +96,11 @@ private:
     int                         activeVertex;
     
     float                       nextTimeEvent;
-    ofColor                     rndColor;
+    float                       globalSpeedLow;
+    float                       globalSpeedHigh;
+    int                         actualScene;
+    int                         fuckUpCounter; // how many changes till one is changed
+    int                         nextFuckUpAt; // which one
 };
 
 #endif /* HexagonMap_hpp */
