@@ -11,6 +11,8 @@ public:
     void setup();
     void update();
     void draw();
+    
+    void keyReleased(int key);
 
 private:
     HexagonMap          Hexagon;
