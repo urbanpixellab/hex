@@ -8,6 +8,9 @@ Below is a very quick and make-shift guide to install RPi with the hex project.
 
 1. Install Raspbian Lite on micro SDHC card, use Raspbian stretch.
 
+    wget https://downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2017-07-05/2017-07-05-raspbian-jessie-lite.zip
+    dd bs=4M if=unzipped_file_from_download-lite.img of=/dev/mmcblk0
+
 1. Boot RPi from the card with network cable connected.
 
 1. Log in with username `pi` and password `raspberry`.
@@ -92,7 +95,7 @@ Below is a very quick and make-shift guide to install RPi with the hex project.
 `sudo ./install_dependencies.sh`
 `cd ..`
 `./compileOF.sh`
-`sudo raspi-config` and set GPU memory to `256`
+`sudo raspi-config` and set GPU memory to `128`
 `apt-get clean`
 
 
@@ -115,7 +118,7 @@ Below is a very quick and make-shift guide to install RPi with the hex project.
 
 # Installation status
 
-hostname|model|tuned|wifi |openFrameworks|hex       |screen
+hostname|model|tuned|wifi |openFrameworks|hex       |screen  |rpi-update
 --------|-----|-----|-----|--------------|----------|---
 janna¹  |2    |yes  |yes  |compiling     |uncompiled|blanking
 els     |2    |yes  |build|build         |uncompiled|blanking
