@@ -86,6 +86,14 @@ Below is a very quick and make-shift guide to install RPi with the hex project.
 1. reboot with `sudo reboot`
 
 
+# Setting up Wwifi accespoint on raspberry pi
+
+1. Follow this guide: http://elinux.org/RPI-Wireless-Hotspot
+
+1. You might run into troubles that udhcpd is not running. That is because the wireless driver needs time to come up add `sleep 20` to the top of `/etc/init.d/udhcpd` as found here: https://github.com/harryallerston/RPI-Wireless-Hotspot/issues/10 and here: https://unix.stackexchange.com/questions/351875/udhcpd-service-started-but-udhcpd-process-not-running alternatively you can try to add: `ifconfig wlan0 10.10.10.10`
+`service udhcpd restart`
+to /etc/rc.local (https://github.com/rachelproject/rachelpiOS/issues/15)
+
 # Installing openFrameworks
 
 `cd ~`
