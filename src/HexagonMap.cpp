@@ -42,12 +42,14 @@ void HexagonMap::addHexagon(ofxOscMessage &message)
         m.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
         ofVec3f c = ofVec3f(ofGetWidth() / 2,ofGetHeight() /2,0);
         m.addVertex(c);
+        m.addIndex(0);
         for (int i = 0; i < 7; i++)
         {
             int rad = 100;
             int x = c.x + rad * cos((i / 6.) * TWO_PI);
             int y = c.y + rad * sin((i / 6.) * TWO_PI);
             m.addVertex(ofVec3f(x,y,0));
+            m.addIndex(i+1);
         }
         addTexCoords(m);
         hexagons.push_back(m);
@@ -68,6 +70,8 @@ void HexagonMap::addHexagon(ofVec3f * verts,int length)
     for (int i = 0; i < length; i++)
     {
         m.addVertex(verts[i]);
+        m.addIndex(i);
+
     }
     addTexCoords(m);
 
@@ -347,11 +351,22 @@ void HexagonMap::draw()
             {
                 // draw the active one solid
                 if(i == activeHexagon){
-                    hexagons[i].drawWireframe();
+                    //hexagons[i].drawWireframe();
+                    hexagons[i].draw();
+                    ofVec2f centerPoint = hexagons[i].getVertices()[0];
+                    ofVec2f firstpoint = hexagons[i].getVertices()[1];
+                    int dist = int(centerPoint.distance(firstpoint)/1.5);
+
+                    ofSetLineWidth(10);
+                    ofSetColor(255,0,0);
+                    ofDrawLine(centerPoint.x-dist,centerPoint.y,centerPoint.x+dist,centerPoint.y);
+                    ofDrawLine(centerPoint.x,centerPoint.y-dist,centerPoint.x,centerPoint.y+dist);
+                    //ofSetLineWidth(1);
                 }
                 // and the others as wireframe
                 else{
                     //hexagons[i].drawWireframe();
+                    ofSetColor(255,255,255);
                     drawSingleHexagon(i);
                 }
             }
