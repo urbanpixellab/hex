@@ -35,7 +35,8 @@ Below is a very quick and make-shift guide to install RPi with the hex project.
 
 1. Change localisation/internationlization to `I3` and choose `Generic 105-key (Intl) PC` then `Other` and then `English (US)` and finally `English (US) - Enlish (US, with euro on 5)`. Then choose `No AltGr key` and `Right Logo key` for compose key.
 
-1. Set localisation/internationlization to `I4` and choose `NL Netherlands`
+1. Set localisation/internationlization to `I4` and choose `NL Netherlands` If you get errors on localisation follow this tip: https://raspberrypi.stackexchange.com/questions/22672/locale-errors-when-installing-packages/40146#40146
+
 
 1. For Interfacing, choose SSH and choose `Yes`.
 
