@@ -94,6 +94,8 @@ Below is a very quick and make-shift guide to install RPi with the hex project.
 `service udhcpd restart`
 to /etc/rc.local (https://github.com/rachelproject/rachelpiOS/issues/15)
 
+1. For the RaspberryPI 2 you will need this hostapd: https://github.com/lostincynicism/hostapd-rtl8188 find tutorial on how to install it here: https://learn.adafruit.com/setting-up-a-raspberry-pi-as-a-wifi-access-point/install-software
+
 # Installing openFrameworks
 
 `cd ~`
