@@ -141,3 +141,19 @@ melanie |?    |yes  |     |compiling     |uncompiled|blanking|
 qualle  |?    |yes  |     |compiling     |uncompiled|blanking|
 
 1) red LED broken?
+
+
+
+
+
+
+
+
+sound
+
+/etc/cron.d/wood
+
+*/5 * * * *	pi	aplay /home/pi/of_v0.9.8_linuxarmv6l_release/apps/myApps/hex/bin/data/sounds/wood
+pecker-mono.wav && aplay /home/pi/of_v0.9.8_linuxarmv6l_release/apps/myApps/hex/bin/data/sounds/woodpecke
+r-mono.wav && aplay /home/pi/of_v0.9.8_linuxarmv6l_release/apps/myApps/hex/bin/data/sounds/woodpecker-mon
+o.wav
