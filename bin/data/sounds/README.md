@@ -15,6 +15,11 @@ original is 99644__juskiddink__frogs.wav<br/>
 https://freesound.org/people/juskiddink/sounds/99644/<br/>
 edited is frogs.wav
 
+frog<br/>
+original is 71964__daveincamas__frogsflp.wav<br/>
+https://freesound.org/people/daveincamas/sounds/71964/<br/>
+edited is frog.wav
+
 owl<br/>
 original is 25945__inchadney__owl.wav<br/>
 https://freesound.org/people/inchadney/sounds/25945/<br/>
