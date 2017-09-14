@@ -35,7 +35,8 @@ Below is a very quick and make-shift guide to install RPi with the hex project.
 
 1. Change localisation/internationlization to `I3` and choose `Generic 105-key (Intl) PC` then `Other` and then `English (US)` and finally `English (US) - Enlish (US, with euro on 5)`. Then choose `No AltGr key` and `Right Logo key` for compose key.
 
-1. Set localisation/internationlization to `I4` and choose `NL Netherlands`
+1. Set localisation/internationlization to `I4` and choose `NL Netherlands` If you get errors on localisation follow this tip: https://raspberrypi.stackexchange.com/questions/22672/locale-errors-when-installing-packages/40146#40146
+
 
 1. For Interfacing, choose SSH and choose `Yes`.
 
@@ -84,6 +85,16 @@ Below is a very quick and make-shift guide to install RPi with the hex project.
 
 1. reboot with `sudo reboot`
 
+
+# Setting up Wwifi accespoint on raspberry pi
+
+1. Follow this guide: http://elinux.org/RPI-Wireless-Hotspot
+
+1. You might run into troubles that udhcpd is not running. That is because the wireless driver needs time to come up add `sleep 20` to the top of `/etc/init.d/udhcpd` as found here: https://github.com/harryallerston/RPI-Wireless-Hotspot/issues/10 and here: https://unix.stackexchange.com/questions/351875/udhcpd-service-started-but-udhcpd-process-not-running alternatively you can try to add: `ifconfig wlan0 10.10.10.10`
+`service udhcpd restart`
+to /etc/rc.local (https://github.com/rachelproject/rachelpiOS/issues/15)
+
+1. For the RaspberryPI 2 you will need this hostapd: https://github.com/lostincynicism/hostapd-rtl8188 find tutorial on how to install it here: https://learn.adafruit.com/setting-up-a-raspberry-pi-as-a-wifi-access-point/install-software
 
 # Installing openFrameworks
 

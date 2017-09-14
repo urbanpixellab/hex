@@ -67,6 +67,7 @@ public:
     void moveHexagon(ofxOscMessage &m);
     void movePoint(ofxOscMessage &m);
     void setEditMode(ofxOscMessage &m);
+    void togglePreviewMode();
     void setActiveHexagon(int i);
     void setActiveVertex(int i);
     void update();
@@ -78,8 +79,12 @@ public:
     
     void load();
     void loadScenes();
+    void loadPreviewScene();
+    void receiveSceneOSC(ofxOscMessage &m);
+    void setScene(int i, int j);
     void save(ofxOscMessage &m);
     void save();
+    
     
     
 private:
@@ -92,6 +97,7 @@ private:
     
     ofShader                    shader;
     bool                        isEditMode;
+    bool                        inPreviewMode;
     int                         activeHexagon;
     int                         activeVertex;
     
