@@ -1,2 +1,4 @@
+ofxNetwork
 ofxOsc
+ofxPJControl
 ofxXmlSettings

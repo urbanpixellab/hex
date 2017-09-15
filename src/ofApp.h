@@ -5,6 +5,7 @@
 
 
 
+
 class ofApp : public ofBaseApp{
 
 public:
@@ -13,6 +14,9 @@ public:
     void draw();
     
     void keyReleased(int key);
+    
+    
+
 
 private:
     HexagonMap          Hexagon;

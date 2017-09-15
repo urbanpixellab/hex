@@ -13,6 +13,7 @@
 #include "ofMain.h"
 #include "ofxOsc.h"
 #include "ofxXmlSettings.h"
+#include "ofxPJControl.h"
 
 #define MIN_TIME 10
 #define MAX_TIME 20
@@ -85,6 +86,8 @@ public:
     void setScene(int i, int j);
     void save(ofxOscMessage &m);
     void save();
+    
+    ofxPJControl projector;
     
     
     

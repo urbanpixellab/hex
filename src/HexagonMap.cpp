@@ -9,6 +9,7 @@
 // TODO communicate with beamer
 // TODO rotate hexagons
 // TDOD add visuals/scenes
+// TODO add fuckups
 
 #include "HexagonMap.hpp"
 
@@ -26,7 +27,19 @@ HexagonMap::HexagonMap()
     loadScenes();
     load();
 
+    // FOR projector
+    projector.setup();
+    string myProjectorIP = "192.168.10.10";
+    
+    //Plug an ethernet into your projector and check it settings to find this IP
+    projector.setProjectorIP(myProjectorIP);
+    
+    //You can set a password on your projector to access PJ Link
+    projector.setProjectorPassword("abcde");
+    projector.setProjectorType(PJLINK_MODE);
 
+    
+    
     isEditMode = false;
     inPreviewMode = false;
     receiver.setup(20000);
@@ -138,6 +151,20 @@ void HexagonMap::update()
         else if (m.getAddress() == "/scene") receiveSceneOSC(m);
         else if (m.getAddress() == "/preview") loadPreviewSceneOSC(m);
         else if (label == "/up" || label == "/down" || label == "/left" || label == "/right") movePoint(m);
+        else if (label == "/poweron"){
+            float value = m.getArgAsFloat(0);
+            if(value == 1) {
+                projector.On();
+                cout << projector.getProjectorStatus() << endl;
+            }
+        }
+        else if (label == "/poweroff"){
+            float value = m.getArgAsFloat(0);
+            if(value == 1) {
+                projector.Off();
+                cout << projector.getProjectorStatus() << endl;
+            }
+        }
         
         // SET active hexagon
         for(int i=0;i<MAX_HEXAGONS;i++){
