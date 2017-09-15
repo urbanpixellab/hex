@@ -1,9 +1,9 @@
 <scene>
-	<drawingID>0</drawingID>
-	<direction>0</direction>
-	<stripeWidth>1.6</stripeWidth>
+	<drawingID>2</drawingID>
+	<direction>1</direction>
+	<stripeWidth>0.3</stripeWidth>
 	<colorR>255</colorR>
 	<colorG>0</colorG>
 	<colorB>0</colorB>
-	<speed>1</speed>
+	<speed>2.0</speed>
 </scene>

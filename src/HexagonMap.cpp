@@ -418,6 +418,10 @@ void HexagonMap::drawSingleHexagon(int & id)
 {
     float scale = ofNoise(ofGetElapsedTimef() + id);
     
+    //ofColor a = ofColor(hexSettings[id].color.r-20,hexSettings[id].color.g-20,hexSettings[id].color.b-20);
+    ofColor b = ofColor(0);
+    ofColor color = b.lerp(hexSettings[id].color, ofNoise(ofGetElapsedTimef()));
+    
     
     switch (hexSettings[id].drawingID)
     {
@@ -462,7 +466,8 @@ void HexagonMap::drawSingleHexagon(int & id)
             
         // solid
         case DRAWING::COLORED:
-            ofSetColor(hexSettings[id].color);
+      
+            ofSetColor(color); // changes with lerp
             hexagons[id].draw();
             break;
             
