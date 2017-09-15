@@ -80,6 +80,7 @@ public:
     void load();
     void loadScenes();
     void loadPreviewScene();
+    void loadPreviewSceneOSC(ofxOscMessage &m);
     void receiveSceneOSC(ofxOscMessage &m);
     void setScene(int i, int j);
     void save(ofxOscMessage &m);

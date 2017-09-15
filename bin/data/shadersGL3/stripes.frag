@@ -5,12 +5,14 @@ in vec2 texcoord0;
 
 
 uniform float phase;
+uniform float stripeWidth;
 uniform int direction;
 
 void main ()
 {
   float tiles = 5.0;
-  float rep = 1.0 / tiles;
+  float rep = stripeWidth / tiles;
+  //float rep = 1.0 / tiles;
   vec2 tc = mod(texcoord0.xy + vec2(phase),vec2(rep));
   float trigger = rep * 2.5;
   float c = step(trigger,tc.x * tiles);

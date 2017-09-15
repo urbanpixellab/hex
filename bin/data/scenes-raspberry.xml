@@ -21,7 +21,7 @@
 <scene>
 	<drawingID>4</drawingID>
 	<direction>0</direction>
-	<stripeWidth>0.1</stripeWidth>
+	<stripeWidth>0.5</stripeWidth>
 	<colorR>255</colorR>
 	<colorG>0</colorG>
 	<colorB>255</colorB>
@@ -30,7 +30,7 @@
 <scene>
 	<drawingID>3</drawingID>
 	<direction>0</direction>
-	<stripeWidth>0.1</stripeWidth>
+	<stripeWidth>0.5</stripeWidth>
 	<colorR>100</colorR>
 	<colorG>100</colorG>
 	<colorB>0</colorB>
@@ -39,7 +39,7 @@
 <scene>
 	<drawingID>2</drawingID>
 	<direction>0</direction>
-	<stripeWidth>0.1</stripeWidth>
+	<stripeWidth>0.5</stripeWidth>
 	<colorR>100</colorR>
 	<colorG>200</colorG>
 	<colorB>50</colorB>

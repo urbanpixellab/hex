@@ -6,12 +6,14 @@
 //
 //
 
+// TODO communicate with beamer
+// TODO rotate hexagons
+// TDOD add visuals/scenes
+
 #include "HexagonMap.hpp"
 
 HexagonMap::HexagonMap()
 {
-    loadScenes();
-    load();
     fuckUpCounter = 0;
     nextFuckUpAt = ofRandom(MIN_FUCK_UP,MAX_FUCK_UP);
     
@@ -20,8 +22,11 @@ HexagonMap::HexagonMap()
 #else
     shader.load("shadersGL3/stripes");
 #endif
+    
+    loadScenes();
+    load();
 
-    //shader.load("stripes.vert","stripes.frag");
+
     isEditMode = false;
     inPreviewMode = false;
     receiver.setup(20000);
@@ -29,8 +34,11 @@ HexagonMap::HexagonMap()
     
     activeHexagon = 0;
     activeVertex = 0;
+    
+    createNewSetting();
 }
 
+// Add a Hexagon from an OSC message
 void HexagonMap::addHexagon(ofxOscMessage &message)
 {
     float value = message.getArgAsFloat(0);
@@ -63,6 +71,7 @@ void HexagonMap::addHexagon(ofxOscMessage &message)
     }
 }
 
+// Add a Hexagon from an xmlsettings
 void HexagonMap::addHexagon(ofVec3f * verts,int length)
 {
     ofMesh m;
@@ -85,6 +94,7 @@ void HexagonMap::addHexagon(ofVec3f * verts,int length)
     hexSettings.push_back(newSetting);
 }
 
+// add texture coordinates
 void HexagonMap::addTexCoords(ofMesh &m)
 {
     // make a bounding box and calculate the texcoords
@@ -110,7 +120,7 @@ void HexagonMap::addTexCoords(ofMesh &m)
     }
 }
 
-
+// proces OSC messages
 void HexagonMap::update()
 {
     while (receiver.hasWaitingMessages())
@@ -126,27 +136,23 @@ void HexagonMap::update()
         else if (m.getAddress() == "/save") save(m);
         else if (m.getAddress() == "/revert") revert(m);
         else if (m.getAddress() == "/scene") receiveSceneOSC(m);
+        else if (m.getAddress() == "/preview") loadPreviewSceneOSC(m);
         else if (label == "/up" || label == "/down" || label == "/left" || label == "/right") movePoint(m);
         
         // SET active hexagon
         for(int i=0;i<MAX_HEXAGONS;i++){
             string messageToCheck = "/hexagon/1/"+ofToString(i+1);
-            
-            if (m.getAddress() == messageToCheck){
-                setActiveHexagon(i);
-            }
+            if (m.getAddress() == messageToCheck) setActiveHexagon(i);
         }
         
         // SET active hexagon point
         // the 2 offset is because we also use scale/move as index
         for(int i=0;i<NUM_VERTICES+2;i++){
             string messageToCheck = "/point/1/"+ofToString(i+1);
-            
-            if (m.getAddress() == messageToCheck){
-                setActiveVertex(i);
-            }
+            if (m.getAddress() == messageToCheck) setActiveVertex(i);
         }
       }
+    // if not in editmode check if we go to th enext setting
     if (!isEditMode)
     {
         float now = ofGetElapsedTimef();
@@ -158,10 +164,12 @@ void HexagonMap::update()
     }
 }
 
+// Change Hexagon visual settings
 void HexagonMap::createNewSetting()
 {
     // select a scene and set the hexagons, also count the number of settings then mak one crazy after 10-20, by now only the speed, but could be also something else
     
+    // no scenes? do something random
     if (scenes.size() == 0) //random
     {
         for (int i = 0; i < hexSettings.size(); i++)
@@ -215,7 +223,7 @@ void HexagonMap::movePoint(ofxOscMessage &m)
         // Safety
         if (activeHexagon >= hexagons.size() || activeVertex > 9) return;
         
-        // IF a is selected from gui we scale the whole hexagon
+        // SCALE IF a is selected from gui we scale the whole hexagon
         if(activeVertex == 0){
             ofLogVerbose("We should Scale the whole hexagon( "+ofToString(hexagons[activeHexagon].getNumVertices())+" )");
             
@@ -237,7 +245,7 @@ void HexagonMap::movePoint(ofxOscMessage &m)
                 hexagons[activeHexagon].getVertices()[i].y = y;
             }
         }
-        // IF b is selected from gui we move the whole hexagon
+        // MOVE ALL IF b is selected from gui we move the whole hexagon
         else if(activeVertex == 1){
             ofLogVerbose("We should Move the whole hexagon");
             for (int i = 0; i < hexagons[activeHexagon].getNumVertices(); ++i)
@@ -245,14 +253,24 @@ void HexagonMap::movePoint(ofxOscMessage &m)
                 hexagons[activeHexagon].getVertices()[i] += shift;
             }
         }
-        // ELSE we move point of hexagon
+        // MOVE POINT ELSE we move point of hexagon
         // since we use 0 ad 1 for move and scale we need to do -2 to get the correct vertex.
+        // vertex 2 is Midle point
+        // vertex 3 should move with -- vertex 9
         else{
             ofLogVerbose("We should Move");
-            hexagons[activeHexagon].getVertices()[activeVertex-2] += shift;
+            if(activeVertex == 3){ // move two points so the shape stays closed
+                ofLogVerbose("We should Move 2 points");
+                hexagons[activeHexagon].getVertices()[1] += shift;
+                hexagons[activeHexagon].getVertices()[7] += shift;
+            }else{
+                hexagons[activeHexagon].getVertices()[activeVertex-2] += shift;
+            }
+            
         }
 }
 
+// TOGGLE edit mode
 void HexagonMap::setEditMode(ofxOscMessage &m)
 {
     float value = m.getArgAsFloat(0);
@@ -266,13 +284,15 @@ void HexagonMap::setEditMode(ofxOscMessage &m)
             // save current center points for aal hexagons voor revert
             hexCenters[i] = hexagons[i].getVertices()[0];
         }
-      }
+    }
 }
 
+// Set the active HEXAGON (the one to edit)
 void HexagonMap::setActiveHexagon(int i){
     activeHexagon = i;
 }
 
+// Set the active POINT of Hexagon (the one to edit)
 void HexagonMap::setActiveVertex(int i){
     activeVertex = i;
     ofLogVerbose("Set active vertex: "+ofToString(i));
@@ -281,11 +301,14 @@ void HexagonMap::setActiveVertex(int i){
 // set the scene
 void HexagonMap::setScene(int actualScene, int fucked)
 {
+    cout << "setScene! " << endl;
     for (int i = 0; i < hexSettings.size(); i++)
     {
         hexSettings[i].direction = scenes[actualScene].direction;
         hexSettings[i].color = scenes[actualScene].color;
         hexSettings[i].drawingID = scenes[actualScene].drawingID;
+        hexSettings[i].stripeWidth = scenes[actualScene].stripeWidth;
+        cout << "setScene " << i << " : stripeWidth: " << hexSettings[i].stripeWidth << endl;
         hexSettings[i].speed = scenes[actualScene].speed;
         if(fucked == i) hexSettings[i].speed = scenes[actualScene].speed * -1;
     }
@@ -299,12 +322,21 @@ void HexagonMap::receiveSceneOSC(ofxOscMessage &m)
         ofLogVerbose("Scene recieved: "+ofToString(scene));
         setScene(scene, -1);
     }
+}
+
+// load preview scene on recieve message from OSC
+void HexagonMap::loadPreviewSceneOSC(ofxOscMessage &m)
+{
+    int scene = round(m.getArgAsFloat(0));
+    if(scene != actualScene){
+        ofLogVerbose("Load previewScene");
+        loadPreviewScene();
+    }
     
 }
 
 
-
-// Mute the hexagon
+// Mute the hexagon (Make in invidible)
 void HexagonMap::muteHexagon(ofxOscMessage &m)
 {
     float value = m.getArgAsFloat(0);
@@ -313,7 +345,7 @@ void HexagonMap::muteHexagon(ofxOscMessage &m)
     }
 }
 
-// Rvert the edited hexagon
+// Revert the edited hexagon
 void HexagonMap::revert(ofxOscMessage &m)
 {
     float value = m.getArgAsFloat(0);
@@ -333,11 +365,10 @@ void HexagonMap::revert(ofxOscMessage &m)
             hexagons[activeHexagon].getVertices()[i].x = x;
             hexagons[activeHexagon].getVertices()[i].y = y;
         }
-
     }
-    
 }
 
+// DRAW the hexagon
 void HexagonMap::draw()
 {
     // Loop through the hexagons
@@ -349,23 +380,26 @@ void HexagonMap::draw()
             // EDIT MODE
             if (isEditMode)
             {
-                // draw the active one solid
+                // draw the active one solid (with a cross for the center)
                 if(i == activeHexagon){
-                    //hexagons[i].drawWireframe();
                     hexagons[i].draw();
+                    
+                    // calculate the average distance of points from the centre
+                    int dist = 0;
                     ofVec2f centerPoint = hexagons[i].getVertices()[0];
-                    ofVec2f firstpoint = hexagons[i].getVertices()[1];
-                    int dist = int(centerPoint.distance(firstpoint)/1.5);
+                    for(int j = 1; j < hexagons[i].getNumVertices(); j++){
+                        ofVec2f point = hexagons[i].getVertices()[j];
+                        dist += int(centerPoint.distance(point)/1.8);
+                    }
+                    dist = dist / (hexagons[i].getNumVertices()-1);
 
-                    ofSetLineWidth(10);
+                    ofSetLineWidth(8);
                     ofSetColor(255,0,0);
                     ofDrawLine(centerPoint.x-dist,centerPoint.y,centerPoint.x+dist,centerPoint.y);
                     ofDrawLine(centerPoint.x,centerPoint.y-dist,centerPoint.x,centerPoint.y+dist);
-                    //ofSetLineWidth(1);
                 }
-                // and the others as wireframe
+                // and the others with shader
                 else{
-                    //hexagons[i].drawWireframe();
                     ofSetColor(255,255,255);
                     drawSingleHexagon(i);
                 }
@@ -379,34 +413,44 @@ void HexagonMap::draw()
     }
 }
 
+// DRAW a single HEXAGON with shader
 void HexagonMap::drawSingleHexagon(int & id)
 {
     float scale = ofNoise(ofGetElapsedTimef() + id);
+    
+    
     switch (hexSettings[id].drawingID)
     {
+        // stripes back&forth
         case DRAWING::NORMAL:
             ofSetColor(hexSettings[id].color);
             shader.begin();
             shader.setUniform1f("phase", ofNoise(ofGetElapsedTimef() * hexSettings[id].speed));
             shader.setUniform1i("direction", hexSettings[id].direction);
+            shader.setUniform1f("stripeWidth", hexSettings[id].stripeWidth);
+            //cout << "stripewidth: " << hexSettings[id].stripeWidth << endl;
             hexagons[id].draw();
             shader.end();
             break;
             
+        // stripes and moving
         case DRAWING::FORWARD:
             ofSetColor(hexSettings[id].color);
             shader.begin();
             shader.setUniform1f("phase", ofGetElapsedTimef() * hexSettings[id].speed);
             shader.setUniform1i("direction", hexSettings[id].direction);
+            shader.setUniform1f("stripeWidth", hexSettings[id].stripeWidth);
             hexagons[id].draw();
             shader.end();
             break;
             
+        // stripes & scaling
         case DRAWING::SCALED:
             ofSetColor(hexSettings[id].color);
             shader.begin();
             shader.setUniform1f("phase", ofNoise(ofGetElapsedTimef()));
             shader.setUniform1i("direction", hexSettings[id].direction);
+            shader.setUniform1f("stripeWidth", hexSettings[id].stripeWidth);
             ofPushMatrix();
             ofTranslate(hexagons[id].getCentroid());
             ofScale(scale,scale);
@@ -416,11 +460,13 @@ void HexagonMap::drawSingleHexagon(int & id)
             shader.end();
             break;
             
+        // solid
         case DRAWING::COLORED:
             ofSetColor(hexSettings[id].color);
             hexagons[id].draw();
             break;
             
+        // solid & scaling
         case DRAWING::SCALED_COLORED:
             ofSetColor(hexSettings[id].color);
             ofPushMatrix();
@@ -437,6 +483,7 @@ void HexagonMap::drawSingleHexagon(int & id)
 
 }
 
+// LOAD hexagon settings from xmlsettings
 void HexagonMap::load()
 {
     ofxXmlSettings settings;
@@ -462,6 +509,7 @@ void HexagonMap::load()
     }
 }
 
+// LOAD SCENE from xmlsettings
 void HexagonMap::loadScenes()
 {
     ofxXmlSettings settings;
@@ -474,6 +522,7 @@ void HexagonMap::loadScenes()
         settings.pushTag("scene",i);
         newScene.drawingID = settings.getValue("drawingID", 0);
         newScene.stripeWidth = settings.getValue("stripeWidth", 0.5); // percent 0-1
+        cout << "load width: " << newScene.stripeWidth << endl;
         int r = settings.getValue("colorR", 255);
         int g = settings.getValue("colorG", 255);
         int b = settings.getValue("colorB", 255);
@@ -483,10 +532,13 @@ void HexagonMap::loadScenes()
         scenes.push_back(newScene);
     }
     actualScene = ofRandom(scenes.size());
-//    createNewSetting();
+    cout << "actualScene : " << actualScene << endl;
+    setScene(actualScene, -1);
+    
+    //  createNewSetting();
 }
 
-// load preview scen to tty out visual settings
+// load preview scen to try out visual settings
 void HexagonMap::loadPreviewScene()
 {
     ofLogVerbose("Loading Preview Scene");
@@ -509,13 +561,16 @@ void HexagonMap::loadPreviewScene()
         settings.popTag();
     }
     
-    // set settings form preview scene
+    cout << newScene.drawingID << " : "  << newScene.stripeWidth << " : "  << newScene.speed << " : "  << newScene.color << endl;
+    
+    // set settings from preview scene
     for (int i = 0; i < hexSettings.size(); i++)
     {
         cout << "hexsettings: " << i << endl;
         hexSettings[i].direction = newScene.direction;
         hexSettings[i].color = newScene.color;
         hexSettings[i].drawingID = newScene.drawingID;
+        hexSettings[i].stripeWidth = newScene.stripeWidth;
         hexSettings[i].speed = newScene.speed;
     }
 }
@@ -531,6 +586,7 @@ void HexagonMap::save(ofxOscMessage &m)
     }
 }
 
+// save hexagon settings to xml
 void HexagonMap::save()
 {
     ofxXmlSettings settings;
@@ -553,6 +609,7 @@ void HexagonMap::save()
     settings.save("settings.xml");
 }
 
+// no (yet) used
 void HexagonMap::togglePreviewMode(){
     inPreviewMode = ! inPreviewMode;
 }
