@@ -29,7 +29,7 @@ HexagonMap::HexagonMap()
 
     // FOR projector
     projector.setup();
-    string myProjectorIP = "192.168.10.10";
+    string myProjectorIP = "192.168.20.10";
     
     //Plug an ethernet into your projector and check it settings to find this IP
     projector.setProjectorIP(myProjectorIP);
