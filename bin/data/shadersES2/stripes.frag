@@ -40,7 +40,6 @@ void main ()
   vec2 tc = mod(texcoord0.xy + vec2(phase),vec2(rep));
   float trigger = rep * 2.5;
   float c = step(trigger,tc.x * tiles);
-  float c = step(trigger,tc.x * tiles);
   if(xandy == 1) c *= step(trigger,tc.y * (tiles/0.5));
 
   if(direction == 1){ 
