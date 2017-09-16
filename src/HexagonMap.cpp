@@ -6,7 +6,6 @@
 //
 //
 
-// TODO communicate with beamer
 // TODO rotate hexagons
 // TDOD add visuals/scenes
 // TODO add fuckups
@@ -42,6 +41,7 @@ HexagonMap::HexagonMap()
     
     isEditMode = false;
     inPreviewMode = false;
+    showTest = false;
     receiver.setup(20000);
     nextTimeEvent = ofGetElapsedTimef() + 10;
     
@@ -103,6 +103,8 @@ void HexagonMap::addHexagon(ofVec3f * verts,int length)
     newSetting.direction = 0;
     newSetting.color = ofColor(255,255,255);
     newSetting.drawingID = 0;
+    newSetting.xandy = 0;
+    newSetting.tiles = 5.0;
     newSetting.isMuted = false;
     hexSettings.push_back(newSetting);
 }
@@ -150,6 +152,7 @@ void HexagonMap::update()
         else if (m.getAddress() == "/revert") revert(m);
         else if (m.getAddress() == "/scene") receiveSceneOSC(m);
         else if (m.getAddress() == "/preview") loadPreviewSceneOSC(m);
+        else if (m.getAddress() == "/test") showTheTest(m);
         else if (label == "/up" || label == "/down" || label == "/left" || label == "/right") movePoint(m);
         else if (label == "/poweron"){
             float value = m.getArgAsFloat(0);
@@ -328,14 +331,16 @@ void HexagonMap::setActiveVertex(int i){
 // set the scene
 void HexagonMap::setScene(int actualScene, int fucked)
 {
-    cout << "setScene! " << endl;
+    //cout << "setScene! " << endl;
     for (int i = 0; i < hexSettings.size(); i++)
     {
         hexSettings[i].direction = scenes[actualScene].direction;
         hexSettings[i].color = scenes[actualScene].color;
         hexSettings[i].drawingID = scenes[actualScene].drawingID;
         hexSettings[i].stripeWidth = scenes[actualScene].stripeWidth;
-        cout << "setScene " << i << " : stripeWidth: " << hexSettings[i].stripeWidth << endl;
+        hexSettings[i].xandy = scenes[actualScene].xandy;
+        hexSettings[i].tiles = scenes[actualScene].tiles;
+        //cout << "setScene " << i << " : stripeWidth: " << hexSettings[i].stripeWidth << endl;
         hexSettings[i].speed = scenes[actualScene].speed;
         if(fucked == i) hexSettings[i].speed = scenes[actualScene].speed * -1;
     }
@@ -372,6 +377,15 @@ void HexagonMap::muteHexagon(ofxOscMessage &m)
     }
 }
 
+void HexagonMap:: showTheTest(ofxOscMessage &m){
+    float value = m.getArgAsFloat(0);
+    if(value == 1) {
+        
+        showTest = ! showTest;
+        cout << "show test: " << showTest << endl;
+    }
+}
+
 // Revert the edited hexagon
 void HexagonMap::revert(ofxOscMessage &m)
 {
@@ -399,45 +413,54 @@ void HexagonMap::revert(ofxOscMessage &m)
 void HexagonMap::draw()
 {
     // Loop through the hexagons
-    for (int i = 0; i < hexagons.size(); i++){
+    if(!showTest){
+        ofSetBackgroundColor(0);
+        for (int i = 0; i < hexagons.size(); i++){
+            
+            // CHECK if they are not muted
+            if(!hexSettings[i].isMuted){
         
-        // CHECK if they are not muted
-        if(!hexSettings[i].isMuted){
-    
-            // EDIT MODE
-            if (isEditMode)
-            {
-                // draw the active one solid (with a cross for the center)
-                if(i == activeHexagon){
-                    hexagons[i].draw();
-                    
-                    // calculate the average distance of points from the centre
-                    int dist = 0;
-                    ofVec2f centerPoint = hexagons[i].getVertices()[0];
-                    for(int j = 1; j < hexagons[i].getNumVertices(); j++){
-                        ofVec2f point = hexagons[i].getVertices()[j];
-                        dist += int(centerPoint.distance(point)/1.8);
-                    }
-                    dist = dist / (hexagons[i].getNumVertices()-1);
+                // EDIT MODE
+                if (isEditMode)
+                {
+                    // draw the active one solid (with a cross for the center)
+                    if(i == activeHexagon){
+                        hexagons[i].draw();
+                        
+                        // calculate the average distance of points from the centre
+                        int dist = 0;
+                        ofVec2f centerPoint = hexagons[i].getVertices()[0];
+                        for(int j = 1; j < hexagons[i].getNumVertices(); j++){
+                            ofVec2f point = hexagons[i].getVertices()[j];
+                            dist += int(centerPoint.distance(point)/1.8);
+                        }
+                        dist = dist / (hexagons[i].getNumVertices()-1);
 
-                    ofSetLineWidth(8);
-                    ofSetColor(255,0,0);
-                    ofDrawLine(centerPoint.x-dist,centerPoint.y,centerPoint.x+dist,centerPoint.y);
-                    ofDrawLine(centerPoint.x,centerPoint.y-dist,centerPoint.x,centerPoint.y+dist);
+                        ofSetLineWidth(8);
+                        ofSetColor(255,0,0);
+                        ofDrawLine(centerPoint.x-dist,centerPoint.y,centerPoint.x+dist,centerPoint.y);
+                        ofDrawLine(centerPoint.x,centerPoint.y-dist,centerPoint.x,centerPoint.y+dist);
+                    }
+                    // and the others with shader
+                    else{
+                        ofSetColor(255,255,255);
+                        drawSingleHexagon(i);
+                    }
                 }
-                // and the others with shader
-                else{
-                    ofSetColor(255,255,255);
+                // REGULAR DRAW MODE
+                else // draw with shader
+                {
                     drawSingleHexagon(i);
                 }
             }
-            // REGULAR DRAW MODE
-            else // draw with shader
-            {
-                drawSingleHexagon(i);
-            }
         }
     }
+    else{
+        // Draw white square
+        ofSetBackgroundColor(255);
+    }
+    
+    
 }
 
 // DRAW a single HEXAGON with shader
@@ -459,7 +482,8 @@ void HexagonMap::drawSingleHexagon(int & id)
             shader.setUniform1f("phase", ofNoise(ofGetElapsedTimef() * hexSettings[id].speed));
             shader.setUniform1i("direction", hexSettings[id].direction);
             shader.setUniform1f("stripeWidth", hexSettings[id].stripeWidth);
-            //cout << "stripewidth: " << hexSettings[id].stripeWidth << endl;
+            shader.setUniform1i("xandy", hexSettings[id].xandy);
+            shader.setUniform1f("tiles", hexSettings[id].tiles);
             hexagons[id].draw();
             shader.end();
             break;
@@ -471,6 +495,8 @@ void HexagonMap::drawSingleHexagon(int & id)
             shader.setUniform1f("phase", ofGetElapsedTimef() * hexSettings[id].speed);
             shader.setUniform1i("direction", hexSettings[id].direction);
             shader.setUniform1f("stripeWidth", hexSettings[id].stripeWidth);
+            shader.setUniform1i("xandy", hexSettings[id].xandy);
+            shader.setUniform1f("tiles", hexSettings[id].tiles);
             hexagons[id].draw();
             shader.end();
             break;
@@ -482,6 +508,8 @@ void HexagonMap::drawSingleHexagon(int & id)
             shader.setUniform1f("phase", ofNoise(ofGetElapsedTimef()));
             shader.setUniform1i("direction", hexSettings[id].direction);
             shader.setUniform1f("stripeWidth", hexSettings[id].stripeWidth);
+            shader.setUniform1i("xandy", hexSettings[id].xandy);
+            shader.setUniform1f("tiles", hexSettings[id].tiles);
             ofPushMatrix();
             ofTranslate(hexagons[id].getCentroid());
             ofScale(scale,scale);
@@ -508,6 +536,19 @@ void HexagonMap::drawSingleHexagon(int & id)
             hexagons[id].draw();
             ofPopMatrix();
             break;
+        case DRAWING::ROTATE:
+            ofSetColor(hexSettings[id].color);
+            ofPushMatrix();
+            ofRotate(ofNoise(ofGetElapsedTimef()));
+            shader.begin();
+            shader.setUniform1f("phase", ofNoise(ofGetElapsedTimef() * hexSettings[id].speed));
+            shader.setUniform1i("direction", hexSettings[id].direction);
+            shader.setUniform1f("stripeWidth", hexSettings[id].stripeWidth);
+            hexagons[id].draw();
+            shader.end();
+            ofPopMatrix();
+            break;
+
             
         default:
             break;
@@ -554,7 +595,9 @@ void HexagonMap::loadScenes()
         settings.pushTag("scene",i);
         newScene.drawingID = settings.getValue("drawingID", 0);
         newScene.stripeWidth = settings.getValue("stripeWidth", 0.5); // percent 0-1
-        cout << "load width: " << newScene.stripeWidth << endl;
+        newScene.direction = settings.getValue("direction", 1);
+        newScene.xandy = settings.getValue("xandy", 1);
+        newScene.tiles = settings.getValue("tiles", 1);
         int r = settings.getValue("colorR", 255);
         int g = settings.getValue("colorG", 255);
         int b = settings.getValue("colorB", 255);
@@ -585,6 +628,9 @@ void HexagonMap::loadPreviewScene()
         settings.pushTag("scene",i);
         newScene.drawingID = settings.getValue("drawingID", 0);
         newScene.stripeWidth = settings.getValue("stripeWidth", 0.5); // percent 0-1
+        newScene.direction = settings.getValue("direction", 1);
+        newScene.xandy = settings.getValue("xandy", 1);
+        newScene.tiles = settings.getValue("tiles", 1);
         int r = settings.getValue("colorR", 255);
         int g = settings.getValue("colorG", 255);
         int b = settings.getValue("colorB", 255);
@@ -598,12 +644,14 @@ void HexagonMap::loadPreviewScene()
     // set settings from preview scene
     for (int i = 0; i < hexSettings.size(); i++)
     {
-        cout << "hexsettings: " << i << endl;
+        //cout << "hexsettings: " << i << endl;
         hexSettings[i].direction = newScene.direction;
         hexSettings[i].color = newScene.color;
         hexSettings[i].drawingID = newScene.drawingID;
         hexSettings[i].stripeWidth = newScene.stripeWidth;
         hexSettings[i].speed = newScene.speed;
+        hexSettings[i].xandy = newScene.xandy;
+        hexSettings[i].tiles = newScene.tiles;
     }
 }
 

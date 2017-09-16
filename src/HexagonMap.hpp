@@ -33,7 +33,8 @@ public:
         SCALED,
         COLORED,
         SCALED_COLORED,
-        SIZE
+        SIZE,
+        ROTATE
     };
     
     struct HexagonSetting //setting per hexagon!!!
@@ -43,6 +44,8 @@ public:
         float   stripeWidth;
         int     drawingID;
         float   speed;
+        int     xandy;
+        float   tiles;
         bool    isMuted;
     };
     
@@ -53,6 +56,8 @@ public:
         float   stripeWidth; //0-1
         int     drawingID; // 0 -> DRAWING::SIZE
         float   speed;// -1 -> +1
+        int     xandy;
+        float   tiles;
     };
     
     
@@ -86,6 +91,8 @@ public:
     void setScene(int i, int j);
     void save(ofxOscMessage &m);
     void save();
+    void showTheTest(ofxOscMessage &m);
+
     
     ofxPJControl projector;
     
@@ -102,6 +109,7 @@ private:
     ofShader                    shader;
     bool                        isEditMode;
     bool                        inPreviewMode;
+    bool                        showTest;
     int                         activeHexagon;
     int                         activeVertex;
     

@@ -2,12 +2,102 @@
 <globTimeHigh>10</globTimeHigh>
 <scene>
 	<drawingID>0</drawingID>
+	<direction>0</direction>
+	<stripeWidth>14.0</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>0.5</speed>
+	<tiles>20.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>1</drawingID>
+	<direction>1</direction>
+	<stripeWidth>14.0</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>0.5</speed>
+	<tiles>20.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>1</drawingID>
+	<direction>1</direction>
+	<stripeWidth>14.0</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>1.5</speed>
+	<tiles>4.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>1</drawingID>
+	<direction>0</direction>
+	<stripeWidth>14.0</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>1.5</speed>
+	<tiles>4.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>1</drawingID>
+	<direction>0</direction>
+	<stripeWidth>14.0</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>1.5</speed>
+	<tiles>13.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>1</drawingID>
+	<direction>1</direction>
+	<stripeWidth>14.0</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>1.5</speed>
+	<tiles>13.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>2</drawingID>
+	<direction>0</direction>
+	<stripeWidth>14.0</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>7.5</speed>
+	<tiles>13.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>0</drawingID>
 	<direction>1</direction>
 	<stripeWidth>1.0</stripeWidth>
 	<colorR>255</colorR>
 	<colorG>0</colorG>
 	<colorB>0</colorB>
 	<speed>2.0</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>0</drawingID>
+	<direction>1</direction>
+	<stripeWidth>3.0</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>2.5</speed>
+	<tiles>3.0</tiles>
+	<xandy>0</xandy>
 </scene>
 <scene>
 	<drawingID>0</drawingID>
@@ -17,15 +107,52 @@
 	<colorG>0</colorG>
 	<colorB>0</colorB>
 	<speed>2.0</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
 </scene>
 <scene>
 	<drawingID>1</drawingID>
 	<direction>1</direction>
-	<stripeWidth>0.2</stripeWidth>
+	<stripeWidth>3.0</stripeWidth>
 	<colorR>255</colorR>
 	<colorG>0</colorG>
 	<colorB>0</colorB>
-	<speed>0.1</speed>
+	<speed>0.5</speed>
+	<tiles>15.0</tiles>
+	<xandy>1</xandy>
+</scene>
+<scene>
+	<drawingID>1</drawingID>
+	<direction>0</direction>
+	<stripeWidth>3.0</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>0.5</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>1</drawingID>
+	<direction>1</direction>
+	<stripeWidth>3.0</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>0.5</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>1</drawingID>
+	<direction>1</direction>
+	<stripeWidth>0.4</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>0.4</speed>
+	<tiles>5.0</tiles>
+	<xandy>1</xandy>
 </scene>
 <scene>
 	<drawingID>1</drawingID>
@@ -35,6 +162,30 @@
 	<colorG>0</colorG>
 	<colorB>0</colorB>
 	<speed>0.1</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>1</drawingID>
+	<direction>0</direction>
+	<stripeWidth>0.2</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>0.1</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>1</drawingID>
+	<direction>0</direction>
+	<stripeWidth>1.2</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>0.1</speed>
+	<tiles>5.0</tiles>
+	<xandy>1</xandy>
 </scene>
 <scene>
 	<drawingID>2</drawingID>
@@ -44,6 +195,41 @@
 	<colorG>0</colorG>
 	<colorB>0</colorB>
 	<speed>2.0</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>3</drawingID>
+	<direction>1</direction>
+	<stripeWidth>3.0</stripeWidth>
+	<colorR>255</colorR>
+	<colorG>0</colorG>
+	<colorB>0</colorB>
+	<speed>0.5</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>3</drawingID>
+	<direction>1</direction>
+	<stripeWidth>3.0</stripeWidth>
+	<colorR>0</colorR>
+	<colorG>255</colorG>
+	<colorB>0</colorB>
+	<speed>0.5</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
+</scene>
+<scene>
+	<drawingID>3</drawingID>
+	<direction>1</direction>
+	<stripeWidth>3.0</stripeWidth>
+	<colorR>0</colorR>
+	<colorG>0</colorG>
+	<colorB>255</colorB>
+	<speed>0.5</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
 </scene>
 <scene>
 	<drawingID>4</drawingID>
@@ -53,6 +239,8 @@
 	<colorG>0</colorG>
 	<colorB>0</colorB>
 	<speed>0.1</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
 </scene>
 <scene>
 	<drawingID>4</drawingID>
@@ -62,6 +250,8 @@
 	<colorG>255</colorG>
 	<colorB>0</colorB>
 	<speed>0.1</speed>
+	<tiles>5.0</tiles>
+	<xandy>0</xandy>
 </scene>
 <scene>
 	<drawingID>4</drawingID>
@@ -71,33 +261,8 @@
 	<colorG>0</colorG>
 	<colorB>255</colorB>
 	<speed>0.1</speed>
-</scene>
-<scene>
-	<drawingID>3</drawingID>
-	<direction>1</direction>
-	<stripeWidth>0.2</stripeWidth>
-	<colorR>255</colorR>
-	<colorG>0</colorG>
-	<colorB>0</colorB>
-	<speed>0.1</speed>
-</scene>
-<scene>
-	<drawingID>3</drawingID>
-	<direction>1</direction>
-	<stripeWidth>0.2</stripeWidth>
-	<colorR>0</colorR>
-	<colorG>255</colorG>
-	<colorB>0</colorB>
-	<speed>0.1</speed>
-</scene>
-<scene>
-	<drawingID>3</drawingID>
-	<direction>1</direction>
-	<stripeWidth>0.2</stripeWidth>
-	<colorR>0</colorR>
-	<colorG>0</colorG>
-	<colorB>255</colorB>
-	<speed>0.1</speed>
+	<tiles>5.0</tiles>
+	<xandy>1</xandy>
 </scene>
 
 
