@@ -425,6 +425,8 @@ void HexagonMap::draw()
                 {
                     // draw the active one solid (with a cross for the center)
                     if(i == activeHexagon){
+                        ofSetColor(255);
+
                         hexagons[i].draw();
                         
                         // calculate the average distance of points from the centre
