@@ -29,6 +29,8 @@ varying vec2        texcoord0;
 uniform float phase;
 uniform int direction;
 uniform float stripeWidth;
+uniform int xandy;
+uniform float tiles;
 
 void main ()
 {
