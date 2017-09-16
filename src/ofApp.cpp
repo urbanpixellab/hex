@@ -4,7 +4,7 @@
 void ofApp::setup()
 {
     ofHideCursor();
-    //ofSetFullscreen(true);
+    ofSetFullscreen(true);
     ofSetBackgroundColor(0);
 }
 
